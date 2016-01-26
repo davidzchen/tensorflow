@@ -1,7 +1,6 @@
 # Platform-specific build configurations.
 
-load("/google/protobuf/protobuf", "cc_proto_library")
-load("/google/protobuf/protobuf", "py_proto_library")
+load("@protobuf//:protobuf.bzl", "cc_proto_library", "py_proto_library")
 
 # Appends a suffix to a list of deps.
 def tf_deps(deps, suffix):
@@ -32,17 +31,21 @@ def tf_proto_library(name, srcs = [], has_services = False,
   cc_proto_library(name=name + "_cc",
                    srcs=srcs + tf_deps(deps, "_proto_srcs"),
                    deps=deps,
-                   cc_libs = ["//google/protobuf:protobuf"],
+                   cc_libs = ["@protobuf//:protobuf"],
                    testonly=testonly,
-                   visibility=visibility,)
+                   visibility=visibility,
+                   default_runtime="@protobuf//:protobuf",
+                   protoc="@protobuf//:protoc")
 
   py_proto_library(name=name + "_py",
                    srcs=srcs + tf_deps(deps, "_proto_srcs"),
                    srcs_version="PY2AND3",
                    deps=deps,
-                   py_libs = ["//google/protobuf:protobuf_python"],
+                   py_libs = ["@protobuf//:protobuf_python"],
                    testonly=testonly,
-                   visibility=visibility,)
+                   visibility=visibility,
+                   default_runtime="@protobuf//:protobuf_python",
+                   protoc="@protobuf//:protoc")
 
 def tf_proto_library_py(name, srcs=[], deps=[], visibility=[], testonly=0):
   py_proto_library(name = name + "_py",
@@ -50,7 +53,9 @@ def tf_proto_library_py(name, srcs=[], deps=[], visibility=[], testonly=0):
                    srcs_version = "PY2AND3",
                    deps = deps,
                    visibility = visibility,
-                   testonly = testonly)
+                   testonly = testonly,
+                   default_runtime="@protobuf//:protobuf_python",
+                   protoc="@protobuf//:protoc")
 
 def tf_additional_lib_srcs():
   return [
